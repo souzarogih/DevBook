@@ -22,6 +22,8 @@
 
 ### Instalação de módulos
 
-`go get github.com/gorilla/mux`
-`go get github.com/joho/godotenv`
-`go get github.com/go-sql-driver/mysql`
+<ul>
+  <ol>go get github.com/gorilla/mux</ol>
+  <ol>go get github.com/joho/godotenv</ol>
+  <ol>go get github.com/go-sql-driver/mysql</ol>
+</ul>

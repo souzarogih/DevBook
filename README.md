@@ -10,4 +10,4 @@
 
 ## Fazer o clone do repositório
 
-`$ git clone`
+`$ git clone https://github.com/souzarogih/DevBook.git`

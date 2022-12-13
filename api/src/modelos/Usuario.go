@@ -17,8 +17,8 @@ type Usuario struct {
 }
 
 // Preparar vai chamar os métodos para validar e formatar o usuário recebido
-func (usuario *Usuario) Preparar() error {
-	if erro := usuario.validar(); erro != nil {
+func (usuario *Usuario) Preparar(etapa string) error {
+	if erro := usuario.validar(etapa); erro != nil {
 		return erro
 	}
 
@@ -26,7 +26,8 @@ func (usuario *Usuario) Preparar() error {
 	return nil
 }
 
-func (Usuario *Usuario) validar() error {
+// middleware(schemas output) 
+func (Usuario *Usuario) validar( etapa string) error {
 	if Usuario.Nome == "" {
 		return errors.New("O nome é obrigatório e não pode estar em banco.")
 	}
@@ -39,7 +40,7 @@ func (Usuario *Usuario) validar() error {
 		return errors.New("O email é obrigatório e não pode estar em banco.")
 	}
 
-	if Usuario.Senha == "" {
+	if etapa == "cadastro" && Usuario.Senha == "" {
 		return errors.New("A senha é obrigatório e não pode estar em banco.")
 	}
 

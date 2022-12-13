@@ -7,31 +7,36 @@ import (
 	"api/src/respostas"
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"strconv"
+	"strings"
+
+	"github.com/gorilla/mux"
 )
 
 // CriarUsuario insere um usuário no banco de dados
 func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 	corpoRequest, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
-		respostas.Erro(w, http.StatusUnprocessableEntity, erro)
+		respostas.Erro(w, http.StatusUnprocessableEntity, erro, "106")
 		return
 	}
 
 	var usuario modelos.Usuario
 	if erro = json.Unmarshal(corpoRequest, &usuario); erro != nil {
-		respostas.Erro(w, http.StatusBadRequest, erro)
+		respostas.Erro(w, http.StatusBadRequest, erro, "105")
 		return
 	}
 	
-	if erro = usuario.Preparar(); erro != nil {
-		respostas.Erro(w, http.StatusBadRequest, erro)
+	if erro = usuario.Preparar("cadastro"); erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "104")
 		return
 	}
 
 	db, erro := banco.Conectar()
 	if erro != nil {
-		respostas.Erro(w, http.StatusInternalServerError, erro)
+		respostas.Erro(w, http.StatusInternalServerError, erro, "103")
 		return
 	}
 	defer db.Close()
@@ -39,7 +44,7 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
 	usuario.ID, erro = repositorio.Criar(usuario)
 	if erro != nil {
-		respostas.Erro(w, http.StatusInternalServerError, erro)
+		respostas.Erro(w, http.StatusInternalServerError, erro, "102")
 		return
 	}
 
@@ -48,17 +53,103 @@ func CriarUsuario(w http.ResponseWriter, r *http.Request) {
 
 // BuscarUsuarios busca todos os usuários salvos no banco de dados
 func BuscarUsuarios(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Buscando todos os Usuários!"))
+	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "101")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	usuarios, erro := repositorio.Buscar(nomeOuNick)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "100")
+		return
+	}
+
+	respostas.JSON(w, http.StatusOK, usuarios)
 }
 
 // BuscarUsuario busca um usuário salvo no banco de dados
 func BuscarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Buscando um Usuário!"))
+	log.Print("Função BuscarUsuario do pacote controllers em execução")
+	parametros := mux.Vars(r)
+
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "107")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "108")
+		log.Print("Erro ao conectar com o banco de dados - 108")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	usuario, erro := repositorio.BuscarPorID(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "109")
+		log.Print("Erro ao localizar o usuário no banco de dados - 109")
+		return
+	}
+	
+	respostas.JSON(w, http.StatusOK, usuario)
 }
 
 // AtualizarUsuario altera as informações de um usuário no banco de dados
 func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Atualizando Usuário!"))
+	log.Print("Função AtualizarUsuario em execução no pacote controllers")
+
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "109")
+		log.Print("Erro ao fazer o parse do campo usuarioId, 109")
+		return
+	}
+
+	corpoRequisicao, erro := ioutil.ReadAll(r.Body)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnprocessableEntity, erro, "110")
+		log.Print("Erro ao fazer processar o campo da requisição, 110")
+		return
+	}
+
+	var usuario modelos.Usuario
+	if erro = json.Unmarshal(corpoRequisicao, &usuario); erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "111")
+		log.Print("Erro ao processar o body da requisição, 111")
+		return
+	}
+
+	if erro = usuario.Preparar("edicao"); erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "112")
+		log.Print("Erro ao prepara a requisição para salvar em banco, 112")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "113")
+		log.Print("Erro ao conectar com o banco de dados - 114")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	if erro = repositorio.Atualizar(usuarioID, usuario); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "115")
+		log.Print("Ocorreu um problema ao atualizar os dados do usuário no banco de dados - 115")
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
+
 }
 
 // DeletarUsuario exclui as informações de um usuário no banco de dados

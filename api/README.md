@@ -27,3 +27,9 @@
   <ol>go get github.com/joho/godotenv</ol>
   <ol>go get github.com/go-sql-driver/mysql</ol>
 </ul>
+
+##### Futuras implementações
+
+#### Arquivos de log
+
+https://www.loggly.com/use-cases/logging-in-golang-how-to-start/

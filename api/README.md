@@ -26,6 +26,8 @@
   <ol>go get github.com/gorilla/mux</ol>
   <ol>go get github.com/joho/godotenv</ol>
   <ol>go get github.com/go-sql-driver/mysql</ol>
+  <ol>go get github.com/badoux/checkmail</ol>
+  <ol>go get golang.org/x/crypto/bcrypt</ol>
 </ul>
 
 ##### Futuras implementações

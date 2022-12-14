@@ -136,23 +136,45 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 	db, erro := banco.Conectar()
 	if erro != nil {
 		respostas.Erro(w, http.StatusInternalServerError, erro, "113")
-		log.Print("Erro ao conectar com o banco de dados - 114")
+		log.Print("Erro ao conectar com o banco de dados - 113")
 		return
 	}
 	defer db.Close()
 
 	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
 	if erro = repositorio.Atualizar(usuarioID, usuario); erro != nil {
-		respostas.Erro(w, http.StatusInternalServerError, erro, "115")
-		log.Print("Ocorreu um problema ao atualizar os dados do usuário no banco de dados - 115")
+		respostas.Erro(w, http.StatusInternalServerError, erro, "114")
+		log.Print("Ocorreu um problema ao atualizar os dados do usuário no banco de dados - 114")
 		return
 	}
 
 	respostas.JSON(w, http.StatusNoContent, nil)
-
 }
 
 // DeletarUsuario exclui as informações de um usuário no banco de dados
 func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("Deletando Usuário!"))
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "115")
+		log.Print("Erro ao converter o usuarioId - 115")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "116")
+		log.Print("Erro ao conectar com o banco de dados - 116")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	if erro = repositorio.Deletar(usuarioID); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "117")
+		log.Print("Erro ao criar um novo repositório - 117")
+		return
+	}
+
+	respostas.JSON(w, http.StatusNoContent, nil)
 }

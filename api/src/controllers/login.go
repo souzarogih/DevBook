@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"api/src/autenticacao"
 	"api/src/banco"
 	"api/src/modelos"
 	"api/src/repositorios"
@@ -50,6 +51,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-		w.Write([]byte("Você está logado! Parabéns"))
-
+	token, erro := autenticacao.CriarToken(usuarioSalvoNoBanco.ID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "205")
+		log.Print("Erro interno ao tentar criar o token 205")
+		return
+	}
+	w.Write([]byte(token))
 }

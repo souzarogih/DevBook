@@ -2,6 +2,10 @@
 
 ## API DevBook
 
+[x] JWT Token
+[x] Middlewares
+[x] MySQL
+
 ### Comandos básicos para Golang
 
 ### Criar um módulo
@@ -28,6 +32,7 @@
   <ol>go get github.com/go-sql-driver/mysql</ol>
   <ol>go get github.com/badoux/checkmail</ol>
   <ol>go get golang.org/x/crypto/bcrypt</ol>
+  <ol>go get github.com/dgrijalva/jwt-go</ol>
 </ul>
 
 ##### Futuras implementações

@@ -8,6 +8,21 @@ import (
 	"net/http"
 )
 
+// Essa função init pode ser usada para gerar uma secret usando o base 64
+/* Os imports
+"crypto/rand"
+"encoding/base64" */
+/* func init() {
+	chave := make([]byte, 64)
+
+	if _, erro := rand.Read(chave); erro != nil {
+		log.Fatal(erro)
+	}
+
+	stringBase64 := base64.StdEncoding.EncodeToString(chave)
+	fmt.Println(stringBase64)
+} */
+
 func main() {
 	config.Carregar()
 	r := router.Gerar()

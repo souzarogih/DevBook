@@ -1,11 +1,13 @@
 package controllers
 
 import (
+	"api/src/autenticacao"
 	"api/src/banco"
 	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -113,6 +115,21 @@ func AtualizarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	usuarioIDNoToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "118")
+		log.Printf("Erro ao extrair o usuário do token - 118")
+		return
+	}
+
+	if usuarioID != usuarioIDNoToken {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível atualizar um usuário que não seja o seu."), "122")
+		log.Printf("Usuário do token é diferente do usuário da requisição - 122")
+		return
+	}
+
+	log.Printf("Atualizando usuário %d usando o token do usuário %d ", usuarioID, usuarioIDNoToken)
+
 	corpoRequisicao, erro := ioutil.ReadAll(r.Body)
 	if erro != nil {
 		respostas.Erro(w, http.StatusUnprocessableEntity, erro, "110")
@@ -158,6 +175,19 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 	if erro != nil {
 		respostas.Erro(w, http.StatusBadRequest, erro, "115")
 		log.Print("Erro ao converter o usuarioId - 115")
+		return
+	}
+
+	usuarioIDNoToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "123")
+		log.Print("Erro ao extrair o usuário do token o usuarioId - 123")
+		return
+	}
+
+	if usuarioID != usuarioIDNoToken {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível deletar um usuário que não seja o seu."), "124")
+		log.Print("Não é possível deletar um usuário que com id diferente na requisição e no token. - 124")
 		return
 	}
 

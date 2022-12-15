@@ -2,9 +2,12 @@
 
 ## API DevBook
 
-[x] JWT Token
-[x] Middlewares
-[x] MySQL
+### Tecnologias
+
+- [x] Golang
+- [x] JWT Token
+- [x] Middlewares
+- [x] MySQL
 
 ### Comandos básicos para Golang
 

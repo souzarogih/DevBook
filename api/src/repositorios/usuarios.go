@@ -159,3 +159,44 @@ func (repositorio Usuarios) BuscarPorEmail(email string) (modelos.Usuario, error
 
 	return usuario, nil
 }
+
+// Seguir permite que um usuário siga outro
+func (repositorio Usuarios) Seguir(usuarioID, seguidorID uint64) error {
+	statement, erro := repositorio.db.Prepare(
+		"insert ignore into seguidores (usuario_id, seguidor_id) values (?, ?)",
+	)
+	if erro != nil {
+		log.Printf("Erro ao preparar o insert dos dados - 131")
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(usuarioID, seguidorID); erro != nil {
+		log.Printf("Erro executar o insert no banco de dados - 132")
+		return erro
+	}
+
+	log.Printf("repositorios.Seguir | Usuário %d está seguindo usuário %d", seguidorID, usuarioID)
+	return nil
+
+}
+
+// PararDeSeguir permite que um usuário pare de seguir outro.
+func (repositorio Usuarios) PararDeSeguir(usuarioID, seguidorID uint64) error {
+	statement, erro := repositorio.db.Prepare(
+		"delete from seguidores where usuario_id = ? and seguidor_id = ?",
+	)
+	if erro != nil {
+		log.Printf("Erro ao preparar o delete dos dados - 133")
+		return erro
+	}
+	defer statement.Close()
+
+	if _, erro = statement.Exec(usuarioID, seguidorID); erro != nil {
+		log.Printf("Erro executar o insert no banco de dados - 134")
+		return erro
+	}
+
+	log.Printf("repositorios.PararDeSeguir | Usuário %d está deixando de seguir o usuário %d", seguidorID, usuarioID)
+	return nil
+}

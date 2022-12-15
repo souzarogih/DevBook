@@ -208,3 +208,89 @@ func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
 
 	respostas.JSON(w, http.StatusNoContent, nil)
 }
+
+// SeguirUsuario permite que um usuário siga outro
+func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
+	seguidorID, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "118")
+		log.Printf("Erro ao estrair o seguidor do token - 118")
+		return
+	}
+
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "119")
+		log.Printf("Erro ao converter o usuário di da requisição - 119")
+		return
+	}
+
+	if seguidorID == usuarioID {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível seguir você mesmo"), "120")
+		log.Printf("Usuário tentando seguir a si mesmo - 120")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "121")
+		log.Print("Erro ao conectar com o banco de dados - 121")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	if erro = repositorio.Seguir(usuarioID, seguidorID); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "122")
+		log.Printf("Erro acessar salvar as informações no banco de dados - 122")
+		return
+	}
+
+	log.Printf("Associação do usuário %d seguindo o usuário %d realizada com sucesso ",seguidorID,  usuarioID)
+	respostas.JSON(w, http.StatusNoContent, nil)
+
+}
+
+// PararDeSeguirUsuario permite que um usuário pare de seguir outro
+func PararDeSeguirUsuario(w http.ResponseWriter, r *http.Request) {
+	seguidorID, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "123")
+		log.Printf("Erro ao extrair o usuário que irá deixar de seguir - 123")
+		return
+	}
+
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "124")
+		return
+	}
+
+	if seguidorID == usuarioID {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível parar de seguir você mesmo."), "125")
+		log.Printf("Não é possível deixar de seguir a si mesmo - 125")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "121")
+		log.Print("Erro ao conectar com o banco de dados - 121")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	if erro = repositorio.PararDeSeguir(usuarioID, seguidorID); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "122")
+		log.Printf("Não foi possível se acessar a tabela para deixar de seguir um usuário - 122")
+		return
+	}
+
+	log.Printf("Usuário %d deixou de seguir o usuário %d com sucesso.", seguidorID, usuarioID)
+	respostas.JSON(w, http.StatusNoContent, nil)
+
+
+}

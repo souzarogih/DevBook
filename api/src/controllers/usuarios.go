@@ -6,6 +6,7 @@ import (
 	"api/src/modelos"
 	"api/src/repositorios"
 	"api/src/respostas"
+	"api/src/seguranca"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -291,6 +292,131 @@ func PararDeSeguirUsuario(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Usuário %d deixou de seguir o usuário %d com sucesso.", seguidorID, usuarioID)
 	respostas.JSON(w, http.StatusNoContent, nil)
+}
 
+func BuscarSeguidores(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "123")
+		log.Printf("Erro ao converter a identificação do usuario - 123")
+		return
+	}
 
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "124")
+		log.Printf("Erro ao converter a identificação do usuario - 123")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	seguidores, erro := repositorio.BuscarSeguidores(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "124")
+		return
+	}
+
+	log.Printf("Seguidores listados com sucesso.")
+	respostas.JSON(w, http.StatusOK, seguidores)
+
+}
+
+// BuscarSeguindo traz todos os usuários que um determinado usuário está seguindo
+func BuscarSeguindo(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "123")
+		log.Printf("Erro ao converter a identificação do usuario - 123")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "124")
+		log.Printf("Erro ao converter a identificação do usuario - 124")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	usuarios, erro := repositorio.BuscarSeguindo(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "125")
+		log.Printf("Erro interno ao localizar quem o usuário está seguindo - 125")
+		return
+	}
+	respostas.JSON(w, http.StatusOK, usuarios)
+}
+
+// AtualizarSenha permite alterar a senha de um usuário
+func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
+	usuarioIDNoToken, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "126")
+		log.Printf("Não foi possível extrar o usuárioID do token - 126")
+		return
+	}
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "127")
+		log.Printf("Erro converter o usuario id da requisição - 127")
+		return
+	}
+
+	if usuarioIDNoToken != usuarioID {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível atualizar a senha do um usuário que não é o seu."), "128")
+		log.Printf("Usuário está tentando atualizar a senha com o id diferente do seu. - 128")
+		return
+	}
+
+	corpoRequisicao, erro := ioutil.ReadAll(r.Body)
+
+	var senha modelos.Senha
+	if erro = json.Unmarshal(corpoRequisicao, &senha); erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "129")
+		log.Printf("Erro ao converter o struc/json - 129")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "124")
+		log.Printf("Erro ao converter a identificação do usuario - 124")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDeUsuarios(db)
+	senhaSalvaNoBanco, erro := repositorio.BuscarSenha(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "125")
+		log.Printf("Erro interno ao localizar a senha do banco - 125")
+		return
+	}
+
+	if erro = seguranca.VerificarSenha(senhaSalvaNoBanco, senha.Atual); erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, errors.New("A senha atual não é a mesma salva no banco"), "126")
+		log.Printf("Erro interno ao localizar a senha do banco - 126")
+		return
+	}
+
+	senhaComHash, erro := seguranca.Hash(senha.Nova)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "127")
+		log.Printf("Não foi possível gerar o hash da senha nova - 127")
+		return
+	}
+
+	if erro = repositorio.AtualizarSenha(usuarioID, string(senhaComHash)); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "128")
+		log.Printf("Erro interno ao atualizar a senha do usuário - 128")
+		return
+	}
+
+	log.Printf("A nova senha do usuário foi atualizada com sucesso.")
+	respostas.JSON(w, http.StatusNoContent, nil)
 }

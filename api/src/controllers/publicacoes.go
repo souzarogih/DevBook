@@ -201,5 +201,51 @@ func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
 
 //DeletarPublicacao exclui os dados de uma publicação
 func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
+	log.Printf("repositorios - DeletarPublicacao - Executando a deleção de uma publicação.")
 
+	usuarioID, erro := autenticacao.ExtrairUsuarioID(r)
+	if erro != nil {
+		respostas.Erro(w, http.StatusUnauthorized, erro, "311")
+		log.Printf("Erro ao tentar identificar o usuário da requisição. - 311")
+		return
+	}
+
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "312")
+		log.Printf("Não foi possível converter o campo publicacaoId da requisição. - 312")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "313")
+		log.Printf("Erro interno ao tentar conectar com o banco de dados. - 313")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDePublicacoes(db)
+	publicacaoSalvaNoBanco, erro := repositorio.BuscarPorID(publicacaoID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "314")
+		log.Printf("Erro interno ao tentar conectar com o banco de dados. - 314")
+		return
+	}
+
+	if publicacaoSalvaNoBanco.AutorId != usuarioID {
+		respostas.Erro(w, http.StatusForbidden, errors.New("Não é possível deletar uma publicação que não seja sua."), "315")
+		log.Printf("Usuário está tentando deletar uma publicação que não criou. - 315")
+		return
+	}
+
+	if erro = repositorio.Deletar(publicacaoID); erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "316")
+		log.Printf("Ocorreu um erro interno ao tentar deletar a publicação. - 316")
+		return
+	}
+
+	log.Printf("Publicação %d removida com sucesso.", publicacaoID)
+	respostas.JSON(w, http.StatusNoContent, nil)
 }

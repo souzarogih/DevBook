@@ -40,6 +40,11 @@
 
 ##### Futuras implementações
 
+#### Funcionalides
+
+- [ ] Funcionalidade de comentário persistindo comentário no MongoDB
+- [ ] Aplicação rodar em Docker
+
 #### Arquivos de log
 
 https://www.loggly.com/use-cases/logging-in-golang-how-to-start/

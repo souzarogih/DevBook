@@ -249,3 +249,33 @@ func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Publicação %d removida com sucesso.", publicacaoID)
 	respostas.JSON(w, http.StatusNoContent, nil)
 }
+
+// BuscarPublicacoesPorUsuario traz todas as publicações de um usuário especifico.
+func BuscarPublicacoesPorUsuario(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	usuarioID, erro := strconv.ParseUint(parametros["usuarioId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "317")
+		log.Printf("Ocorreu um erro ao tentar identificar o id do usuário da requisição - 317")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "318")
+		log.Printf("Erro interno ao tentar conectar com o banco de dados. - 318")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDePublicacoes(db)
+	publicacoes, erro := repositorio.BuscarPorUsuario(usuarioID)
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "319")
+		log.Printf("Erro interno ao localizar as publicações do usuário - 319")
+		return
+	}
+
+	log.Printf("Publicações do usuário encontradas com sucesso.")
+	respostas.JSON(w, http.StatusOK, publicacoes)
+}

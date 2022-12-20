@@ -65,8 +65,6 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("Publicação com id %d criado com sucesso.", publicacao.ID)
 	respostas.JSON(w, http.StatusCreated, publicacao)
-
-
 }
 
 // BuscarPublicacoes traz as publicações que apareceriam no feed do usuário
@@ -306,5 +304,35 @@ func CurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("")
+	respostas.JSON(w, http.StatusNoContent, nil)
+}
+
+// DescurtirPublicacao subtrai uma curtida na publicação
+func DescurtirPublicacao(w http.ResponseWriter, r *http.Request){
+	log.Printf("controllers.DescurtirPublicacao - Inicnado a chamada da função.")
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.Erro(w, http.StatusBadRequest, erro, "321")
+		log.Printf("Ocorreu um erro ao tentar identificar o id do usuário da requisição - 321")
+		return
+	}
+
+	db, erro := banco.Conectar()
+	if erro != nil {
+		respostas.Erro(w, http.StatusInternalServerError, erro, "322")
+		log.Printf("Erro interno ao tentar conectar com o banco de dados. - 322")
+		return
+	}
+	defer db.Close()
+
+	repositorio := repositorios.NovoRepositorioDePublicacoes(db)
+	if erro = repositorio.Descurtir(publicacaoID); erro != nil {
+			respostas.Erro(w, http.StatusInternalServerError, erro, "323")
+			log.Printf("Erro interno ao tentar conectar com o banco de dados. - 323")
+			return
+	}
+
+	log.Printf("Publicação descurtida com sucesso")
 	respostas.JSON(w, http.StatusNoContent, nil)
 }

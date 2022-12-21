@@ -27,6 +27,10 @@
 
 `$ go build`
 
+### Executar o build
+
+`$ ./api.exe`
+
 ### Instalação de módulos
 
 <ul>

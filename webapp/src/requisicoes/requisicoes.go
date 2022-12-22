@@ -25,6 +25,6 @@ func FazerRequisicaoComAutenticacao(r *http.Request, metodo, url string, dados i
 		return nil, erro
 	}
 
+	log.Printf("Enviando requisição para a api")
 	return response, nil
-
 }

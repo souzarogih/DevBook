@@ -1,11 +1,14 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"webapp/src/config"
+	"webapp/src/modelos"
 	"webapp/src/requisicoes"
+	"webapp/src/respostas"
 	"webapp/src/utils"
 )
 
@@ -26,7 +29,22 @@ func CarregarPaginaPrincipal(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Carregando tela de home do usuário")
 	url := fmt.Sprintf("%s/publicacoes", config.APIURL)
 	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
-	fmt.Println(response.StatusCode, erro)
+	if erro != nil {
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
 	
-		utils.ExecutarTemplate(w, "home.html", nil)	
+	var publicacoes []modelos.Publicacao
+	if erro = json.NewDecoder(response.Body).Decode(&publicacoes); erro != nil {
+		respostas.JSON(w, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	
+	utils.ExecutarTemplate(w, "home.html", publicacoes)	
 }

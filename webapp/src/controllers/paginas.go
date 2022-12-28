@@ -22,7 +22,7 @@ func CarregarTelaDeLogin(w http.ResponseWriter, r *http.Request) {
 
 // CarregarPaginaDeCadastroDeUsuario vai carregar a página de cadastro de usuário
 func CarregarPaginaDeCadastroDeUsuario(w http.ResponseWriter, r *http.Request) {
-	log.Printf("Carregando tela de cadastro de usuário")
+	log.Printf("Carregando tela de cadastro de usuário - 308")
 		utils.ExecutarTemplate(w, "cadastro.html", nil)	
 }
 
@@ -32,18 +32,21 @@ func CarregarPaginaPrincipal(w http.ResponseWriter, r *http.Request) {
 	url := fmt.Sprintf("%s/publicacoes", config.APIURL)
 	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
 	if erro != nil {
+		log.Printf("Erro ao carregar a pagina principal - 307")
 		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}
 	defer response.Body.Close()
 
 	if response.StatusCode >= 400 {
+		log.Printf("Erro no status code - 306")
 		respostas.TratarStatusCodeErro(w, response)
 		return
 	}
 	
 	var publicacoes []modelos.Publicacao
 	if erro = json.NewDecoder(response.Body).Decode(&publicacoes); erro != nil {
+		log.Printf("Erro no newdecoder - 307")
 		respostas.JSON(w, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}

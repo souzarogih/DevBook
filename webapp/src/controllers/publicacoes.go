@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"webapp/src/config"
 	"webapp/src/requisicoes"
 	"webapp/src/respostas"
+
+	"github.com/gorilla/mux"
 )
 
 // CriarPublicacao chama a API para cadastrar uma publicação no banco de dados
@@ -41,5 +44,63 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	respostas.JSON(w, response.StatusCode, nil)
+}
+
+// CurtirPublicacao chama a API para curtir uma publicação
+func CurtirPublicacao(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro no parse do uint 305")
+		return
+	}
+
+	url := fmt.Sprintf("%s/publicacoes/%d/curtir", config.APIURL, publicacaoID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPost, url, nil)
+	if erro != nil {
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro ao fazer a requisição - 304")
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeErro(w, response)
+		log.Printf("Erro no status code - 300")
+		return
+	}
+
+	log.Printf("Requisição atendida com sucesso!")
+	respostas.JSON(w, response.StatusCode, nil)
+}
+
+// DescurtirPublicacao chama a API para descurtir uma publicação
+func DescurtirPublicacao(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro no parse do uint - 301")
+		return
+	}
+
+	url := fmt.Sprintf("%s/publicacoes/%d/descurtir", config.APIURL, publicacaoID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPost, url, nil)
+	if erro != nil {
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro ao enviar a requisição - 302")
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		respostas.TratarStatusCodeErro(w, response)
+		log.Printf("Erro no status code - 303")
+		return
+	}
+
+	log.Printf("Requisição atendida com sucesso!")
 	respostas.JSON(w, response.StatusCode, nil)
 }

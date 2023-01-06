@@ -49,6 +49,19 @@
 - [ ] Funcionalidade de comentário persistindo comentário no MongoDB
 - [ ] Aplicação rodar em Docker
 
-#### Arquivos de log
+#### Executando o BackEnd
+```bash
+# Crie um arquivo .env no projeto e insira os campos:
 
-https://www.loggly.com/use-cases/logging-in-golang-how-to-start/
+DB_USUARIO=Usuário do banco de dados
+DB_SENHA=Senha do usuário do banco de dados
+DB_NOME=Nome do banco de dados
+API_PORT=Porta que o serviço será executado
+SECRET_KEY=Chave de seguração
+
+# Agora inicie o serviço
+$ go run main.go
+```
+
+#### Links uteis
+- [Loggly](https://www.loggly.com/use-cases/logging-in-golang-how-to-start/)

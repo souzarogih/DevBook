@@ -15,3 +15,20 @@ Rodando na porta 3000
 #### Botão de esqueci minha senha
 
 - [ ] Funcionalidade de enviar e-mail para recuperar senha.
+
+
+- [ReactJs](https://reactjs.org)
+
+
+#### Executando o FrontEnd
+```bash
+# Crie um arquivo .env no projeto e insira uma porta e um secret no arquivo.
+  API_URL=URL do backend.
+  APP_PORT=Porta que o frontend vai executar.
+  HASH_KEY=Um hash para ser usado como chave de segurança.
+  BLOCK_KEY=Um outro hash para ser usado no projeto.
+
+
+# Agora inicie o serviço
+$ go run main.go
+```

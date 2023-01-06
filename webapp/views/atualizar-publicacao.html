@@ -1,0 +1,29 @@
+<html lang="en">
+
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>DevBook - Atualizar Publicação - {{ .Titulo }}</title>
+      <link href="/assets/css/bootstrap.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    {{ template "cabecalho" }}
+
+    <div class="container-fluid">
+      <div class="row mt-4">
+          <div class="col-12">
+            <h3>Editar Publicação</h3>
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input type="text" class="form-control" name="titulo" id="titulo" placeholder="Insira o título da sua publicação" value="{{ .Titulo }}">
+
+            </div>
+          </div>
+      </div>
+    </div>
+
+
+  </body>
+
+</html>

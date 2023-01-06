@@ -64,7 +64,7 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Publicação com id %d criado com sucesso.", publicacao.ID)
-	respostas.JSON(w, http.StatusCreated, publicacao)
+	respostas.JSON(w, http.StatusOK, publicacao)
 }
 
 // BuscarPublicacoes traz as publicações que apareceriam no feed do usuário

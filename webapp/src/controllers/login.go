@@ -57,7 +57,9 @@ func FazerLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Login do usuário realizado com sucesso.")
-	respostas.JSON(w, http.StatusOK, nil)
+	respostas.JSON(w, http.StatusNoContent, nil)
+	// O correto seria retornar 200 na linha de cima, mas o ajax não sabe resolver 
+	// status 200 sem body, por isso foi preciso retornar statusnocontent-204.
 
 	//token, _ := ioutil.ReadAll(response.Body)
 	//fmt.Println(response.StatusCode, string(token))

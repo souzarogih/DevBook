@@ -44,6 +44,14 @@ func CriarPublicacao(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Este if foi colocado para resolver o problema do ajax que não consegue resolver resposta 200 com corpo vazio.
+	if response.StatusCode == 200 {
+		response.StatusCode = 204
+		return
+	}
+
+	fmt.Println(">>", response.StatusCode)
+
 	respostas.JSON(w, response.StatusCode, nil)
 }
 

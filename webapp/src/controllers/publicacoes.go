@@ -112,3 +112,44 @@ func DescurtirPublicacao(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Requisição atendida com sucesso!")
 	respostas.JSON(w, response.StatusCode, nil)
 }
+
+// AtualizarPublicacao chama a API para atualizar uma publicação
+func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro no parse do uint - 304")
+		return
+	}
+
+	r.ParseForm()
+	publicacao, erro := json.Marshal(map[string]string{
+		"titulo": r.FormValue("titulo"),
+		"conteudo": r.FormValue("conteudo"),
+	})
+
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro no marshal das publicações - 305")
+		return
+	}
+
+	url := fmt.Sprintf("%s/publicacoes/%d", config.APIURL, publicacaoID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPut, url, bytes.NewBuffer(publicacao))
+	if erro != nil {
+		log.Printf("Algo aconteceu em AtualizarPublicacao - 306")
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		log.Printf("Ocorreu um erro ao enviar a ao atualizar a requisição - 307")
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
+
+	log.Printf("Requisição atendida com sucesso!")
+	respostas.JSON(w, response.StatusCode, nil)
+}

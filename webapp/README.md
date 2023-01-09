@@ -16,10 +16,6 @@ Rodando na porta 3000
 
 - [ ] Funcionalidade de enviar e-mail para recuperar senha.
 
-
-- [ReactJs](https://reactjs.org)
-
-
 #### Executando o FrontEnd
 ```bash
 # Crie um arquivo .env no projeto e insira uma porta e um secret no arquivo.
@@ -32,3 +28,5 @@ Rodando na porta 3000
 # Agora inicie o serviço
 $ go run main.go
 ```
+#### Links uteis
+- [ReactJs](https://reactjs.org)

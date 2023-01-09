@@ -65,15 +65,15 @@ func CarregarPaginaPrincipal(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// CarregarPaginaDeEdicaoDePublicacao carrega a página edição de publicação
-func CarregarPaginaDeEdicaoDePublicacao(w http.ResponseWriter, r *http.Request) {
+// CarregarPaginaDeAtualizacaoDePublicacao carrega a página edição de publicação
+func CarregarPaginaDeAtualizacaoDePublicacao(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Carregando tela de edição de uma publicação")
 	parametros := mux.Vars(r)
 	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
 	if erro != nil {
 		log.Printf("Erro interno ao processar o json da requisição - 308")
 		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
-		return	
+		return
 	}
 
 	url := fmt.Sprintf("%s/publicacoes/%d", config.APIURL, publicacaoID)

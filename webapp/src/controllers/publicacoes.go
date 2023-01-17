@@ -153,3 +153,32 @@ func AtualizarPublicacao(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Requisição atendida com sucesso!")
 	respostas.JSON(w, response.StatusCode, nil)
 }
+
+// DeletarPublicacao chama a API para deletar uma publicação
+func DeletarPublicacao(w http.ResponseWriter, r *http.Request) {
+	parametros := mux.Vars(r)
+	publicacaoID, erro := strconv.ParseUint(parametros["publicacaoId"], 10, 64)
+	if erro != nil {
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		log.Printf("Erro no parse do uint - 308")
+		return
+	}
+
+	url := fmt.Sprintf("%s/publicacoes/%d", config.APIURL, publicacaoID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodDelete, url, nil)
+	if erro != nil {
+		log.Printf("Algo aconteceu em AtualizarPublicacao - 309")
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		log.Printf("Ocorreu um erro ao enviar a ao atualizar a requisição - 310")
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
+
+	log.Printf("Requisição deletar atendida com sucesso!")
+	respostas.JSON(w, response.StatusCode, nil)
+}

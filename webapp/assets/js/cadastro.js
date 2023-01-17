@@ -19,10 +19,22 @@ function criarUsuario(evento) {
     },
   })
     .done(function () {
-      Swal.fire("Sucesso!", "Usuário cadastrado com sucesso!!", "success");
-    })
-    .fail(function (erro) {
-      console.log(erro);
+      Swal.fire("Sucesso!", "Usuário cadastrado com sucesso!!", "success")
+      .then(function() {
+        $.ajax({
+          url: "/login",
+          method: "POST",
+          data: {
+            email: $('#email').val(),
+            senha: $('#senha').val()
+          }
+        }).done(function() {
+          window.location = "/home";
+        }).fail(function() {
+          Swal.fire("Ops...", "Erro ao autentica o usuário!", "error");
+        })
+      })
+    }).fail(function (erro) {
       Swal.fire("Ops...", "Erro ao cadastrar o usuário!", "error");
     });
 }

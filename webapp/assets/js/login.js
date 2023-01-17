@@ -16,6 +16,6 @@ function fazerLogin(evento) {
     })
     .fail(function (erro) {
       console.log('erro--->>>', erro);
-      alert('Ei!!!! Usuário ou senha invalidos!!');
+      Swal.fire("Ei!!!!", "Usuário ou senha invalidos!!", "error");
     });
 }

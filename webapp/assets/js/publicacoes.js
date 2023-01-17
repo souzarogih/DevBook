@@ -22,7 +22,7 @@ function criarPublicacao(evento) {
       window.location = '/home';
     })
     .fail(function () {
-      alert('Erro ao criar a publicação!');
+      Swal.fire("Ops...", "Erro ao criar a publicação!", "error");
     });
 }
 

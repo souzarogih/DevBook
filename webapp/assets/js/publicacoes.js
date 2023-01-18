@@ -48,7 +48,7 @@ function curtirPublicacao(evento) {
       elementoClicado.removeClass('curtir-publicacao');
     })
     .fail(function () {
-      alert('Erro ao curtir a publicação!');
+      Swal.fire("Ops...", "Erro ao curtir a publicação!", "error");
     })
     .always(function () {
       elementoClicado.prop('disabled', false);
@@ -77,7 +77,7 @@ function descurtirPublicacao(evento) {
       elementoClicado.addClass('curtir-publicacao');
     })
     .fail(function () {
-      alert('Erro ao curtir a publicação!');
+      Swal.fire("Ops...", "Erro ao descurtir a publicação!", "error");
     })
     .always(function () {
       elementoClicado.prop('disabled', false);
@@ -106,7 +106,7 @@ function atualizarPublicacao() {
         window.location = "/home";
       })
   }).fail(function() {
-    alert("Erro ao editar a publicação!");
+    Swal.fire("Ops...", "Erro ao editar a publicação!", "error");
   }).always(function() {
     $('#atualizar-publicacao').prop('disabled', false);
   })
@@ -138,10 +138,8 @@ function deletarPublicacao(evento) {
       $(this).remove();
     });
   }).fail(function() {
-    alert("Erro ao excluir a publicação!");
+    Swal.fire("Ops...", "Erro ao excluir a publicação!", "error");
   });
-
-
   })
 
 }

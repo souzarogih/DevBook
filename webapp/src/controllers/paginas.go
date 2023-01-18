@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"webapp/src/config"
 	"webapp/src/cookies"
 	"webapp/src/modelos"
@@ -19,7 +20,13 @@ import (
 // CarregarTelaDeLogin vai renderizar a tela de login
 func CarregarTelaDeLogin(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Carregando tela de login")
-		utils.ExecutarTemplate(w, "login.html", nil)
+	cookie, _ := cookies.Ler(r)
+
+	if cookie["token"] != "" {
+		http.Redirect(w, r, "/home", 302)
+		return
+	}
+	utils.ExecutarTemplate(w, "login.html", nil)
 }
 
 // CarregarPaginaDeCadastroDeUsuario vai carregar a página de cadastro de usuário
@@ -99,4 +106,35 @@ func CarregarPaginaDeAtualizacaoDePublicacao(w http.ResponseWriter, r *http.Requ
 
 	log.Printf("Carregando a pagina de atualizar uma publicação")
 	utils.ExecutarTemplate(w, "atualizar-publicacao.html", publicacao)
+}
+
+// CarregarPaginaDeUsuarios carrega a página com os usuários que atendem o filtro passado
+func CarregarPaginaDeUsuarios(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Carregando pagina de pesquisa de usuário")
+	nomeOuNick := strings.ToLower(r.URL.Query().Get("usuario"))
+	url := fmt.Sprintf("%s/usuarios?usuario=%s", config.APIURL, nomeOuNick)
+
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodGet, url, nil)
+	if erro != nil {
+		log.Printf("Ocorreu um erro ao fazer a autenticação - 311")
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode >= 400 {
+		log.Printf("Erro com status 400, verificar a requisição - 312")
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
+
+	var usuarios []modelos.Usuario
+	if erro = json.NewDecoder(response.Body).Decode(&usuarios); erro != nil {
+		log.Printf("Erro ao fazer o decoder - 313")
+		respostas.JSON(w, http.StatusUnprocessableEntity, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	log.Printf("Retornando a lista de usuários")
+	utils.ExecutarTemplate(w, "usuarios.html", usuarios)
 }

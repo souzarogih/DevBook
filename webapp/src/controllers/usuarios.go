@@ -8,8 +8,11 @@ import (
 	"net/http"
 	"strconv"
 	"webapp/src/config"
+	"webapp/src/cookies"
+	"webapp/src/modelos"
 	"webapp/src/requisicoes"
 	"webapp/src/respostas"
+	"webapp/src/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -102,5 +105,19 @@ func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respostas.JSON(w, response.StatusCode, nil)
+}
+
+// CarregarPerfilDoUsuarioLogado carregar a página do perfil do usuário logado
+func CarregarPerfilDoUsuarioLogado(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+	usuarioID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	usuario, erro := modelos.BuscarUsuarioCompleto(usuarioID, r)
+	if erro != nil {
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	utils.ExecutarTemplate(w, "perfil.html", usuario)
 }
 

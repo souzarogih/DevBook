@@ -15,6 +15,7 @@ Rodando na porta 3000
 #### Botão de esqueci minha senha
 
 - [ ] Funcionalidade de enviar e-mail para recuperar senha.
+- [ ] Exibir o nome do usuário logado ao lado do botão sair.
 
 #### Executando o FrontEnd
 ```bash

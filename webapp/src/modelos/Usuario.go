@@ -2,6 +2,7 @@ package modelos
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -42,10 +43,43 @@ func BuscarUsuarioCompleto(usuarioID uint64, r *http.Request) (Usuario, error) {
 	)
 
 	for i := 0; i <4; i++ {
-		select {}
+		select {
+		case usuarioCarregado := <-canalUsuario:
+			if usuarioCarregado.ID == 0 {
+				return Usuario{}, errors.New("Erro ao buscar o usuário")
+			}
+
+			usuario = usuarioCarregado
+
+		case seguidoresCarregados := <-canalSeguidores:
+			if seguidoresCarregados == nil {
+				return Usuario{}, errors.New("erro ao buscar os seguidores")
+			}
+
+			seguidores = seguidoresCarregados
+
+		case seguindoCarregados := <-canalSeguindo:
+			if seguindoCarregados == nil {
+				return Usuario{}, errors.New("Erro ao bsucar quem o usuário está seguindo")
+			}
+
+			seguindo = seguindoCarregados
+
+		case publicacoesCarregadas := <-canalPublicacoes:
+			if publicacoesCarregadas == nil {
+				return Usuario{}, errors.New("Erro ao buscar as publicações")
+			}
+
+			publicacoes = publicacoesCarregadas
+		}
 	}
 
+	usuario.Seguidores = seguidores
+	usuario.Seguindo = seguindo
+	usuario.Publicacoes = publicacoes
+	log.Printf("Retornando os dados completo do usuário.")
 
+	return usuario, nil
 }
 
 // BuscarDadosDoUsuario chama a API para buscar os dados base do usuário
@@ -92,6 +126,11 @@ func BuscarSeguidores(canal chan<- []Usuario, usuarioID uint64, r *http.Request)
 		return
 	}
 
+	if seguidores == nil {
+		canal <- make([]Usuario, 0)
+		return
+	}
+
 	log.Printf("Retornando os dados dos seguidores do ", usuarioID)
 	canal <- seguidores
 }
@@ -116,6 +155,11 @@ func BuscarSeguindo(canal chan<- []Usuario, usuarioID uint64, r *http.Request) {
 		return
 	}
 
+	if seguindo == nil {
+		canal <- make([]Usuario, 0)
+		return
+	}
+
 	log.Printf("Retornando os usuários que estão seguindo o usuário ", usuarioID)
 	canal <- seguindo
 }
@@ -137,6 +181,11 @@ func BuscarPublicacoes(canal chan<- []Publicacao, usuarioID uint64, r *http.Requ
 	if erro = json.NewDecoder(response.Body).Decode(&publicacoes); erro != nil {
 		log.Printf("Ocorreu um erro ao fazer o decode do usuário - 407")
 		canal <- nil
+		return
+	}
+
+	if publicacoes == nil {
+		canal <- make([]Publicacao, 0)
 		return
 	}
 

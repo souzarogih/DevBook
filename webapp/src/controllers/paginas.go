@@ -171,6 +171,4 @@ func CarregarPerfilDoUsuario(w http.ResponseWriter, r *http.Request) {
 		Usuario: usuario,
 		UsuarioLogadoID: usuarioLogadoID,
 	})
-
-
 }

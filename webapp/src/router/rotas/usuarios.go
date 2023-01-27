@@ -51,7 +51,7 @@ var rotasUsuarios = []Rota{
 	{
 		URI:    "/editar-usuario",
 		Metodo: http.MethodGet,
-		Funcao: controllers.CarregarPaginaDeEdicaoDoUsuario,
+		Funcao: controllers.CarregarPaginaDeEdicaoDeUsuario,
 		RequerAutenticacao: true,
 	},
 	{

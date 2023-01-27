@@ -51,5 +51,5 @@ function editar(evento) {
       });
   }).fail(function() {
     Swal.fire("Ops...", "Erro ao atualizar o usuário!", "error");
-  })
+  });
 }

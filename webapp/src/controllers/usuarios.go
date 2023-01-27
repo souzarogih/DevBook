@@ -9,10 +9,8 @@ import (
 	"strconv"
 	"webapp/src/config"
 	"webapp/src/cookies"
-	"webapp/src/modelos"
 	"webapp/src/requisicoes"
 	"webapp/src/respostas"
-	"webapp/src/utils"
 
 	"github.com/gorilla/mux"
 )
@@ -107,38 +105,39 @@ func SeguirUsuario(w http.ResponseWriter, r *http.Request) {
 	respostas.JSON(w, response.StatusCode, nil)
 }
 
-// CarregarPerfilDoUsuarioLogado carregar a página do perfil do usuário logado
-func CarregarPerfilDoUsuarioLogado(w http.ResponseWriter, r *http.Request) {
+// EditarUsuario chama a API para editar um usuário
+func EditarUsuario(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	usuario, erro := json.Marshal(map[string]string{
+		"nome": r.FormValue("nome"),
+		"nick": r.FormValue("nick"),
+		"email": r.FormValue("email"),
+	})
+	if erro != nil {
+		log.Printf("Ocorreu um erro na função de EditarUsuario")
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
 	cookie, _ := cookies.Ler(r)
 	usuarioID, _ := strconv.ParseUint(cookie["id"], 10, 64)
 
-	usuario, erro := modelos.BuscarUsuarioCompleto(usuarioID, r)
+	url := fmt.Sprintf("%s/usuarios/%d", config.APIURL, usuarioID)
+
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPut, url, bytes.NewBuffer(usuario))
 	if erro != nil {
+		log.Printf("Ocorreu um erro ao enviar a requisição para EditarUsuario - 111")
 		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
 		return
 	}
-
-	utils.ExecutarTemplate(w, "perfil.html", usuario)
-}
+	defer response.Body.Close()
 	
-// CarregarPaginaDeEdicaodoUsuario carrega a página para edição dos dados do usuário
-func CarregarPaginaDeEdicaoDoUsuario(w http.ResponseWriter, r *http.Request) {
-	cookie, _ := cookies.Ler(r)
-	usuarioID, _ := strconv.ParseUint(cookie["id"], 10, 64)
-	 
-	canal := make(chan modelos.Usuario)
-	go modelos.BuscarDadosDoUsuario(canal, usuarioID, r)
-	usuario := <-canal
-
-	if usuario.ID == 0 {
-		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: "Erro ao buscar o usuário"})
+	if response.StatusCode >= 400 {
+		log.Printf("Erro no status code")
+		respostas.TratarStatusCodeErro(w, response)
 		return
 	}
 
-	utils.ExecutarTemplate(w, "editar-usuario.html", usuario)
-}
-
-// EditarUsuario
-func EditarUsuario(w http.ResponseWriter, r *http.Request) {
-
+	log.Printf("Processando a edição do usuário")
+	respostas.JSON(w, response.StatusCode, nil)
 }

@@ -17,6 +17,7 @@ Rodando na porta 3000
 - [ ] Funcionalidade de enviar e-mail para recuperar senha.
 - [ ] Exibir o nome do usuário logado ao lado do botão sair.
 - [ ] Permitir comentar na publicação de outros usuário.
+- [ ] Aplicação rodar em Docker
 
 #### Executando o FrontEnd
 ```bash

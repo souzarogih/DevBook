@@ -35,7 +35,7 @@
 $ docker-compose up
 
 # Comando para executar na IDE  
-$ python app.py
+$ go run main.go
 
 # O servidor inciará na porta:8000 - acesse <http://127.0.0.1:3000/>
 ```

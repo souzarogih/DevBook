@@ -78,4 +78,10 @@ var rotasUsuarios = []Rota{
 		Funcao: controllers.DeletarUsuario,
 		RequerAutenticacao: true,
 	},
+	{
+		URI:    "/pays",
+		Metodo: http.MethodGet,
+		Funcao: controllers.CarregarPays,
+		RequerAutenticacao: true,
+	},
 }

@@ -1,0 +1,77 @@
+<html lang="en">
+
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>DevBook | {{ .Usuario.Nome }} </title>
+      <link href="/assets/css/bootstrap.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    {{ template "cabecalho" }}
+  
+    <div>
+
+      <table class="table">
+        <thead class="table-dark">
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">Handle</th>
+            <th scope="col">Card</th>
+            <th scope="col">Status</th>
+            <th scope="col">Ação</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+            <td>Python</td>
+            <td>Iesus</td>
+            <td>Iesus2</td>
+          </tr>
+          <tr>
+            <th scope="row">2</th>
+            <td>Jacob</td>
+            <td>Thornton</td>
+            <td>House</td>
+            <td>Canda</td>
+            <td>Ping</td>
+            <td>
+              <button class="btn btn-info">
+                Exc
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td colspan="2">Larry the Bird</td>
+            <td>@twitter</td>
+            <td>Teste</td>
+            <td>Higor</td>
+            <td>Higor2</td>
+          </tr>
+          <tr>
+            <th scope="row">3</th>
+            <td>Button_1</td>
+            <td>Button_2</td>
+            <td>Button_3</td>
+            <td>Button_4</td>
+            <td>Button_5</td>
+            <td>Button_6</td>
+          </tr>
+        </tbody>
+      </table>
+      
+    </div>
+
+    {{ template "rodape" }}
+    {{ template "scripts" }}
+    <script src="/assets/js/publicacoes.js"></script>
+  </body>
+
+</html>

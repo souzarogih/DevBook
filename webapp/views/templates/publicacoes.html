@@ -1,3 +1,13 @@
+{{ define "comentario" }}
+  <div class="card" style="width: 28rem;">
+    <div class="card-body">
+      <h6 class="card-subtitle mb-2 text-muted">higor.souza | 27-01 23:22</h6>
+        <p class="card-text">Some quick example text content.</p>
+        {{ template "curtidas" . }}
+    </div>
+  </div>
+{{ end }}
+
 {{ define "curtidas" }}
   <i class="fa-solid fa-heart curtir-publicacao" style="cursor: pointer;"></i>
   <span> {{ .Curtidas }} </span>
@@ -36,6 +46,10 @@
   {{ template "cabecalho-publicacao" . }}
   <p>
     {{ template "curtidas" . }}
+    {{ template "comentario" }}
+    <button class="btn btn-light" type="submit">
+      Comentar
+  </button>
   </p>
 </div>
 {{ end }}

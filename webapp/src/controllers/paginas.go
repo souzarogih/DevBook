@@ -210,3 +210,9 @@ func CarregarPaginaDeAtualizacaoDeSenha(w http.ResponseWriter, r *http.Request) 
 	log.Printf("Carregando página atualizar-senha.html")
 	utils.ExecutarTemplate(w, "atualizar-senha.html", nil)
 }
+
+// CarregarPays carrega a página payments
+func CarregarPays(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Carregando página atualizar-senha.html")
+	utils.ExecutarTemplate(w, "pays.html", nil)
+}

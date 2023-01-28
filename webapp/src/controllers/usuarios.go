@@ -141,3 +141,62 @@ func EditarUsuario(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Processando a edição do usuário")
 	respostas.JSON(w, response.StatusCode, nil)
 }
+
+// AtualizarSenha chama a API para atualizar a senha do usuário
+func AtualizarSenha(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	senhas, erro := json.Marshal(map[string]string{
+		"atual": r.FormValue("atual"),
+		"nova": r.FormValue("nova"),
+	})
+	if erro != nil {
+		log.Printf("Ocorreu um erro na função de AtualizarSenha")
+		respostas.JSON(w, http.StatusBadRequest, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+
+	cookie, _ := cookies.Ler(r)
+	usuarioID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	url := fmt.Sprintf("%s/usuarios/%d/atualizar-senha", config.APIURL, usuarioID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodPost, url, bytes.NewBuffer(senhas))
+	if erro != nil {
+		log.Printf("Ocorreu um erro ao enviar a requisição para AtualizarSenha - 112")
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+	
+	if response.StatusCode >= 400 {
+		log.Printf("Erro no status code AtualizarSenha")
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
+
+	log.Printf("Processando a edição do usuário")
+	respostas.JSON(w, response.StatusCode, nil)
+}
+
+// DeletarUsuario chama a API para deletar um usuário
+func DeletarUsuario(w http.ResponseWriter, r *http.Request) {
+	cookie, _ := cookies.Ler(r)
+	usuarioID, _ := strconv.ParseUint(cookie["id"], 10, 64)
+
+	url := fmt.Sprintf("%s/usuarios/%d", config.APIURL, usuarioID)
+	response, erro := requisicoes.FazerRequisicaoComAutenticacao(r, http.MethodDelete, url, nil)
+	if erro != nil {
+		log.Printf("Ocorreu um erro ao enviar a requisição para DeletarUsuario - 113")
+		respostas.JSON(w, http.StatusInternalServerError, respostas.ErroAPI{Erro: erro.Error()})
+		return
+	}
+	defer response.Body.Close()
+		
+	if response.StatusCode >= 400 {
+		log.Printf("Erro no status code DeletarUsuario")
+		respostas.TratarStatusCodeErro(w, response)
+		return
+	}
+
+	log.Printf("Processando a exclusão do usuário")
+	respostas.JSON(w, response.StatusCode, nil)
+}
